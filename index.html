@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Controle de Estoque dos EPIs e Uniformes | Lemar</title>
+<style>
+:root{--bg:#fff;--card:#fff;--tx:#141414;--mu:#6b6b6b;--bd:#e2e2e2;--pr:#f0c010;--prt:#111;--prd:#7a5f00;--ok:#157f4b;--okb:#e0f4e9;--wa:#b54708;--wab:#fff0d9;--er:#b42318;--erb:#fde6e3;--in:#fafafa;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121212;--card:#1c1c1c;--tx:#efefef;--mu:#a0a0a0;--bd:#333;--pr:#f0c010;--prt:#111;--prd:#f0c010;--ok:#58d39a;--okb:#13382a;--wa:#f5b45a;--wab:#3d2d12;--er:#ff8b80;--erb:#42201d;--in:#141414}}
+:root[data-theme="dark"]{--bg:#121212;--card:#1c1c1c;--tx:#efefef;--mu:#a0a0a0;--bd:#333;--pr:#f0c010;--prt:#111;--prd:#f0c010;--ok:#58d39a;--okb:#13382a;--wa:#f5b45a;--wab:#3d2d12;--er:#ff8b80;--erb:#42201d;--in:#141414}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{position:relative;background:var(--card);border-bottom:4px solid #f0c010;padding:14px 58px;text-align:center;color:var(--tx)}
+.brand{display:flex;align-items:center;justify-content:center;gap:12px}
+.brand img{display:block;height:56px;width:auto;background:#fff;border-radius:10px;padding:3px}
+.brand b{font-size:19px;letter-spacing:.2px}
+h1{margin:8px 0 0;font-size:17px;font-weight:700;color:var(--tx)}
+nav{display:flex;gap:6px;overflow-x:auto;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--bd)}
+nav button{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;border:1px solid var(--bd);background:var(--in);color:var(--tx);padding:9px 14px;border-radius:999px;font:inherit;font-weight:600;cursor:pointer}
+nav button.on{background:var(--pr);color:var(--prt);border-color:#111}
+main{max-width:1150px;margin:0 auto;padding:16px 14px 40px}
+section{display:none}section.on{display:block}
+h2{font-size:19px;margin:4px 0 14px}h3{font-size:15px;margin:0 0 10px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.kpis{display:grid;gap:12px;grid-template-columns:1fr;margin-bottom:14px;align-items:start}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;min-width:0;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.kpi .n{font-size:30px;font-weight:800;line-height:1.1}.kpi .l{color:var(--mu);font-size:13px}
+.kpi.w .n{color:var(--wa)}.kpi.e .n{color:var(--er)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap}
+th{color:var(--mu);font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+td.r,th.r{text-align:right}
+tr.alert td{background:var(--wab)}
+.kpi{border-top:4px solid var(--pr)}.kpi.w{border-top-color:var(--wa)}.kpi.e{border-top-color:var(--er)}
+.lst{margin-top:10px;border-top:1px solid var(--bd);padding-top:8px;font-size:13px;color:var(--mu);}.lst div{display:flex;justify-content:space-between;gap:8px;padding:2px 0}.lst b{color:var(--tx)}
+.btn.s{margin-right:4px}.btn.s.ed{color:var(--tx)}
+.b{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700}
+.b.ok{background:var(--okb);color:var(--ok)}.b.wa{background:var(--wab);color:var(--wa)}.b.er{background:var(--erb);color:var(--er)}
+.bar{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:14px}
+.bar span.t{flex:0 0 42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar i{display:block;height:12px;background:var(--pr);border-radius:6px;min-width:4px}
+.bar em{font-style:normal;font-weight:700;margin-left:auto}
+.empty{color:var(--mu);padding:8px 0}
+.choice{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.choice button{background:var(--card);border:2px solid var(--bd);border-radius:16px;padding:26px 18px;font:inherit;color:var(--tx);cursor:pointer;text-align:center}
+.choice button:hover{border-color:var(--pr);background:var(--in)}
+.choice .ic{display:flex;justify-content:center;font-size:38px;color:var(--tx)}.choice b{display:block;font-size:18px;margin-top:6px}.choice small{color:var(--mu)}
+form{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:var(--mu)}
+input,select{font:inherit;color:var(--tx);background:var(--in);border:1px solid var(--bd);border-radius:10px;padding:10px 11px;width:100%}
+input:focus,select:focus{outline:2px solid var(--pr);outline-offset:0}
+.act{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:700;border:0;border-radius:10px;padding:11px 20px;cursor:pointer;background:var(--pr);color:var(--prt)}
+.btn.g{background:var(--in);color:var(--tx);border:1px solid var(--bd)}
+.btn.s{padding:5px 10px;font-size:12px;background:var(--in);color:var(--er);border:1px solid var(--bd)}
+.top{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.top input{max-width:280px}.top select{width:auto;max-width:100%}
+.hint{font-size:12px;color:var(--mu);font-weight:400}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:11px 18px;border-radius:10px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;max-width:92vw;z-index:9}
+#toast.on{opacity:1}
+footer{text-align:center;color:var(--mu);font-size:12px;padding:0 14px 24px}
+.ic{display:inline-flex;vertical-align:middle}.ic svg{width:1.15em;height:1.15em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tg{position:absolute;top:12px;right:14px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid var(--bd);background:var(--in);color:var(--tx);cursor:pointer;font-size:19px;padding:0}
+.btn{display:inline-flex;align-items:center;gap:7px}
+.lines{grid-column:1/-1;display:grid;gap:10px}
+.ln{display:grid;grid-template-columns:minmax(0,1fr) 110px auto;gap:10px;align-items:end}
+.ln .btn.s{margin:0;padding:10px 12px}
+.drow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.card p{margin:0 0 12px}.more{margin-top:10px;padding:7px 14px;font-size:13px}
+@media(max-width:520px){.ln{grid-template-columns:minmax(0,1fr) 84px auto}}
+#login{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+#login form{display:grid;grid-template-columns:1fr;width:min(380px,100%);background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:22px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+#login h2{margin:0 0 2px;text-align:center}#le{color:var(--er);min-height:18px;text-align:center}
+</style>
+</head>
+<body>
+<div id="login"><form id="fL"><h2>Entrar no sistema</h2><label>E-mail<input name="email" type="email" required autocomplete="username"></label><label>Senha<input name="pw" type="password" required autocomplete="current-password"></label><button class="btn" type="submit" style="justify-content:center">Entrar</button><div id="le"></div></form></div>
+<header>
+  <button id="lo" class="tg" style="right:62px" title="Sair" aria-label="Sair" data-i="logout"></button>
+  <button id="tg" class="tg" type="button" aria-label="Alternar tema"></button>
+  <div class="brand"><img id="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOYAAABUCAIAAAAZCtySAAAbxklEQVR42u1deVgUV7Y/Vd1N00033ayi7A3IKhJZBVGIBpFEjXvMYGIcTXwxxo/5HI1kokm+xBfN6GQmRk00ozHGJWqCSFQEiazKvkOzNNAsSth737veH0X6IV0giy/Cm/p9/NEU1ffeqvu7557zO6cKBMMwIEFi+gAlbwEJkrIkSJCUJUGCpCwJkrIkSJCUJUGCpCwJkrIkSJCUJUGCpCwJkrIkSJCUJUGCpCwJkrIkSJCUJUGCpCwJkrIkSJCUJUGCpCwJkrIkSJCUJUGCpCwJkrIkSJCU/b+ERPSQnMj/HFCnH0FlerYZKunjg6YN9BKgzgDaLHIiScpOVb721YC6RdLbiGgfASCAMgEoLJsIciJJyk4xpg60gqYdVLWILAuUpYAwMdbzYL6CbR1GTiFJ2alG1jbQCBHpHRD/DGoBUGcBOw6z2AKMADaTnL7/RCBT8DVydfUNMrlyXsAcaV8pDPwEogugFgLVAhhBmOV2tt1KctpIKztVUFFZ3SBo4nC4S6IjpV1p0Pk+qKoBEKBYYNxNYPUu0Jwn30t5eblOp0MQ5LG1iyABAQET2Qf6GwBTA6Ydv7mgAMphcx3x34RCoVgs1mofawfDMHNzc3d3d8IG+Hy+XC4fdiE4TE1Nvb29Db82NzdLJBKtVkt48hOBYRiNRpszZ84T+x0dKIqampp6enpOav6wqYHSsooTp88e+fI4/qu49YSkyEZSwJIUciUF5mJBori/7al0dPToUeK1S6UWFxePqylxX6O45YikIkJSPEuST5Xk08bx8wCRFNtLhH/Hm6qrq4uPj2exWMYDi46OJhxYSkqKl5fXSNMaFhYmEAjwM5OTk5cvX06lTso8OTg4XLt2DcOwGzduTIZzPj4+X3zxxWRm8Nlb2ZLSspTbaf0DA/MC/Lf/+XUAkAiPIN2fAWgAoQGmAs6fwOJ1Ntdh8n3V19fn5+cT8jUqKmrevHnjcbKboO840nMUKBwABFD2OE2FCkxcMbMoAGhpadm9e/eNGzcIT8zMzBQKhcPG9u2337733ns9PT0jNb927VoejwcA+fn5e/bs4fP5k7x10dHRPj4+ANDY2FhXVzfhdmpqak6dOuXq6rpixYqJtfAsUwmtbe3nL/343cUfZTLZgvD5mzZuAABJ5y2k5xCAFgAFTAc0J8ziDbbF7KfSY2FhYVFRkfFxFou1devW8bUly0F6TwCFC4ACjHeLxAAoQHMBRiAAtLa2jsRXANDr9Xfv3m1qahq8aa2te/fuffPNN0fhKwAsWbLEQG6hUDj5WxcWFoYb9Zqamkk21dbWVlxcPOGvPzPKVlRWXfjxan5hMYNODw0OXrPypUEH7+HbgGkHSYCpMIvXwMTpaXWal5cnEAiMj1tbW2/YsGEcJravHuQPAPTjJyvOWB3Q7IEZhose165dG/30tLS0xsZGAKiqqnrvvfcOHz6s1+tHt4hz584FgKKioqysLIVCMcn7FhgYiHvGN27cKCwsnGzIjyAoOnHiPRvHoKCo+PrN21KJ1MTExNXVefXKFwep0P5vRC8ZMrVaMPVnc+yfSqf37t0rLy83Ps5kMpcuXTq+ttR8RHobEPpEx6IFqh3GCAKAioqKpKSkJ/ozdXV1Op3uo48+InRshiE2Nhb/8MMPPzx8+BSy2aGhoc7OzgBQW1tbWVk5ydZ4PF5wcPB0omx27v2UW3dUapVer7fgcmKXLAaA4pLywHlzEUkSgEF00wPNDijWT6vfjIwMwvnmcDhbtmwZh4kVPQR5PmhaAWUBDLV2yNiMLgaAgAkPYYbijmxra+sTv3Po0CGNRtPV1TWWES5btgz/kJ6eLpFIJn/rIiIicM+4pqZGp9NNnrJxcXHThrI59x/cybinVCkBwNzcPPC5AGcnx/yi4tCgQAAAWd4QyqKg/W0i4hERWlpaysvLh0lIuOzi6+s7rsALNI9A1w+MIEBMhvBQD9p20DwaA2M1YOIOzHAWE4RCYWZm5lj6fPjw4RgV9Li4OFyNunXrVn9//0incTgcHo+H3xAEQXQ6XXNzs1wuNz7T39/fwcEBAMrKymg0moeHh6mp6RO3/r6+vkePHhnzm0ajjSJ0TDnKFhQV/5qZIxaLURTVaDRcc/NlMUsAQNjaERoUKO0rB9AAUB4zSLq+p7NUcnJqa2uNj9vY2Lz66qvjaoptHSih2mAGh/t/bacWMN2YrCxCY1t4AEBnZ+f58+fHqEWOcXgvvviiwQMWi8XGJzg6Ou7cuXPDhg0ajcawbsVicUxMDCFlly5d6uLiAgABAQEffPDB3r17n6jIurm5vfbaa1evXjV2o319fUNDQ6cHZVuEraXllV3dPRQKimGYqampvf1gBVZ/fx8AAGI6fGNF6Ij4qsTEg23pNcne09LSGhoajI/b2tq+8cYb422NzX06EWFdXd0Y9/oxgk6nv/TSYCCbmppK6BXExMT89a9/HXbwwYMHI40kIiLCyWnweg0fnmyeCgoIwz5/f//ly5dPD8pWVFU3CJpQFEEQRKfTs8zM7GfZ4X/S6fQAABQOYNhjpEVoILkD3M0Ak6Ls/fv3CU2smZlZRMT4qsAKCwtTUlIePnxIoVAmEnZptU5OTnFxcUFBQXw+Py0t7SneYRRFFy5ciLMqOTn5t99+IzynsrJy165dKpXKsInrdLr29nbCNkNCQnCv4M6dO6dPn25oaKDRaGPZE3CJw9gbGZ8P9gwp2ygQNLUIlUolfsEYpmcwTGfY2ABAZVU1hYICAMvcTorQHg9oUNCLkf5vJdRZbMuJZ1ySkpIIKWtnZ7dx48bx+TYFBUePHtVqtROTaeRy+QsvvBATEwMAXV1dT5eyCIIYvIJLly5JpVJCMpWXl1dXVw/zNIy9fIObERgYCAC5ublJSUkGX2JimDNnjiHrO9UpW1XD73j4iPJ7zhDD3XDP2QDQPyCWy5W/C07BIC8YEoHhhvYWQvcBy8QJ915YWEg4f56engsXLhxXUyUlJYRNjR329vZhYWEA0NjYSGgIbWxsVq5cORLnRvcKDCmlvLw8gx0dRlmVSkX4p5HkLfwDn8+fJF9xR/b555+f7Gbyx1C2s6tbLlegv7vtCIBOp2sUNAGAGZPR2/97jMV64TG+4iPEVND/b2nblxPr+uLFiy0tLcbHZ82aNV6pJTU1taqqajL3wcbGJiQkBGdAVlYW4TkxMTFvv/32SPsviqJsNkFymEKhBAcHu7q6AkBKSkpf31MIW8PCwnCv4MaNG5NPejEYDD8/v6fg//wBfG1oFEilUgRFhu5hGo1GIpUCAJfLQVG0qbkFAIAdC6iZ0YZHB0079B6Xtn01gd6Tk5MJhU9XV1dDpDJWd7yiYpJCekBAwPz58wGgra0tIyOD8Jw1a9Y899xzgYGBxoUsgYGBsbGxhD4JlUo1XM7Vq1fHbkdHwbp163x9fQHg7t279fX1k18AE6uVewaOgVgiUavV6BBlBEUQmVzR2dUFAG48V2trq6KyMp6rC8vCR9oTB6JrALoh6gEGqBmom6D3mBSA5bhjXCF5RUWFsTpoamoaEBCAZ3TGjsrKSuMomEqlurm5BQUFPVFjVygUK1aswKetqampra3N+Bwul4sHKBs3biwuLh4qrEZGRm7btq2oqOjmzZuEXoEhEs/IyFCr1cbnBAcHe3l5GfZ3BEE0Gk1zczNhxp9CoeAODABUVVURNjheyi5YsGB6UFYkEitVKhhKWRSVymRt7R2DBs/Z6UFB0fpVLwMAWG0HSSroRcO1TJQF6iboPS7Vy4CzHkycWcwnp5ru3r1LKKd7eHiMt5Lozp07hPVQ5ubmO3bs2Llz5xOrT7RarZubGwDU19cXFBQQbvqLFy/GF9KWLVsOHTqEDx5BkFWrVu3Zs0ej0Zw9e5aQXoGBgXhNYFpaGqFcNXPmzC1btmzfvt1QZUGlUru6ur788ktCyi5cuNDW1ha32WPJz42OGTNm4B7R9KBs/4BIqVShj+vPep2ut7evsanZnefqPduDX9fQ3NLi6uLCsnxO2hsLoh8B9I/7LQbW/gu0j8BiCzCfHHtmZGR0d3cTUhYP28cVeBEW3VlZWeFlU2O32XV1dYRaAYZh69evH2pW6+vrzc3N165dm5CQ4Ofnd+LEidLSUuMvMpnM+Ph4/PMPP/xAaO+Dg4NxnwRfNjgkEsn9+/cJB7lq1Sq8tDw7O7ujo4NwrYaEhGAY1t3dXVFRMdLFmpiYODg4bN++/eWXX542lGWYmtKoVJVKNTRrQqFQBkTi0vJKd56ruxtvcVSkSPR7qsZqJyirQFUzmI5/jLUM0Img/yxo2qW6d1k2kaN3XVNTYyzfUKnUzs7OAwcOECZ7BleUXu/t7Y1hWFRUlIeHBwCUl5cTJpMUCsXly5dlMtnoOqVGo3n55Zejo6NxB4PQK+BwOEMpGx8fLxQKQ0JCPv30U4MzTbhpDC2TSE5OJlSs5s+fj5d3DUV9fT2hgDpUKygpKSG8UQsWLPjyyy/VanV1dXVCQgLhFeFbx5///Gfj5MWUpiyHy6Gb0iWPSzYIgigUipbfN9N5AXPPX/xRJJYsioxgWfpKlTvht/dB10NQaIJrt5JboBZK1W8BM5xl4T2u8Wi12ry8vLy8vLGcfP36dQ8Pj/T0dMLkGQC0t7d/9NFHY4mXcSe1tLSU0CugUCjD8hpRUVFsNhuXRXFrV11dTRh4GSLxH3/8USQSGZ/D4/GMBVGBQHD79m3C0S5cuNDOzg4Arly5QphlmDVr1rJly/BaGS8vL5FIlJCQQLiklUplc3NzTU0NXiE+PRQDhimdSqEa58gRBBGJxL9mZQ/+iiK/pKbX8usAgDVrA7BiAGE8nlkYMmzEBFTV8DABOvdLu3Okog7Crs3MzCYz8iVLluDbaH5+fnNz82SaWrt2LW63GhoaCH1HKpX6yiuvGEsEhs+lpaWEzjSLxTIEXpcuXSLs3bBXDFtsv/zyC+H5mzdvxrNoKSkpjx4R1Pq4uLgMlbS3bNny1ltvjZQRPH369LFjxwilxilK2XkBc5lMBmZUlYwHYYVFg87Znzas45izb9xK/d1j3w9miwCoI7AWAKEDQgHpTWjdAH2npAMEVjAiIoLJnPjD41FRUbjKU1xcPEmlMyAgAK9g4vP5hHbLzMzM4I8Sory8nNAvt7S0NMhbmZmZhNXfgYGBs2fPNvYKCKtpaTSawd4XFBQQ6mVz5szx9/cfeuTw4cOjlB1/880333777bShLACwiR7Ew9HT13f5WhL+eeWLy7q6e86evwAALHM7sPtvYAYPerEj0BYQOmAy6DkC7W9KO5Okj7+f65133gkPD59wDTwuSGVkZIzk8I0RHh4eOPVLSkoIq/pRFB296nmkSjQKhTJ79mzcIv7888+E68rR0XFoyIWjtrZ2pFzGiy++iPP7+++/H8nNwCO5YTh27JixLceh0+mOHDly+PDh6eHLAoCtrY0Zy0ypUA5jD4IgKpWqtLzcy8N9rr+fn6/3c/5z8otLnB1zohctYHFdpdoD8NvfQFE46iNWKCAoKIqh7VWw3C7VvsayGpSs3d3dT548+cknn9y8eVMmk2EYNsZHmXU6HY/Hw4vuiouLxWIxnU4f10OqhiS+XC5funQpHn0LBIKWlhYajTY0uYVhGJvNHhp4GaO0tBSPb4aOQafTWVtbG6SPn3/+2XiEWq3WUD04FI8ePcJd6mFf0ev1hgrxrKwsqVSKoujQWdNqtT4+PoSJbldX1zNnzqxcuZKQ6AqF4vjx49bW1uMqqH9mlPX29Ghqbm5obDY2eCiKqlTqlFt35vr7AcCfXlnXLxIl37ptamoyPzSEZR0mhU/ht7+BPB8Qymhl/wgVgAp9p0H8s1T1MZg9z+LY45rOmTNnysrKcnJy+vv7x1iBpdPp5s2bh5tGNze3bdu24QtsApRVKpVxcXG4nbO1tcUfMhvalF6vZzAYUVFRo7SmVqu9vLx8fX2HflGr1To4OBjSzhwOx/CUogEymSwuLs74MW69Xm9lZWV45GboccP+rtPpQkJChq0uvV4fFxeHZ4YJPbFjx45duHBBrVYb3y65XC4UCoVC4XiTOI/N8x/2tphLV37KKyhEEcT4SjAMo1Kpc+fM2bRxHX7kk0NHunt7N6x+OTwsBACkPfnQdQBkOY89CDAaX9Rg6g9W24G1hGVOvhfx/xUoH3744R/Tk06n7entHRgQGRtaBEEwDOvq7mYwTJ0dHQHAxcmxUdBcWFLKMjNzcnQwYTqoEQ/QCEHVAAhtDCuRAroeEKeALEOtRdQw04TOJif7/wf+0HdypdxKTf81C2BEh5JCoax8aVlk+HwAKC+vzM0vVKlVSxdH+3h7/W5rPwFpKqCssV8ggB5MZoPlZjBfOX0tbllZWWdnJ+7V4Hu6hYUFXnBtY2MzLHhPT083xGSVlZUSiSQ8PBz3pJubm21tbfHz8/LyzM3NcU23urq6o6MDRdFhrsWDBw96e3sNZbjNzc1CoVCpVFpaWuIJWIFA0NjYONQMOTo6dnR04MKFXq93dXXFg7msrCw7Oztj4WJKU7ZF2Ho77W5FVQ2dPuL+zmQyN//pFQ93N8K/SgdaoOcL6PsaUPqY5Q5sMD6j8YD7KnDWsp7SU+Z/GGpra99+++179+4xGAydTqdWq8PDw8PCwo4ePUqhUOh0elBQ0Pfff49zND4+/qefftq2bds///lPAHjrrbdOnz79j3/849133/3kk09OnTq1fft2a2vrffv29fX1mZmZLVu2LDExMTExMT09HcMwOp2+f//+PXv2XLp0KTExsaWlBUEQe3v7v//97+vXrz958uT+/ft7e3sxDPP09HzjjTeUSuWBAweYTKZer9dqtfb29qtXrz5z5gz+DI9Opztx4kRzc/P58+cfPXpEoVDi4+MTExNHEhamlmMAAFwuR6vVdXZ1y2SykYQnjUbDr2/gubpwORwAuJede+7C5ZKyCiaDYTfD1sSUq0Y9ATUDZSVgCkAoYzO0AKAHXT/I74PktlqjMzEPmkaUlUgk3t7eer2+qakpLi7u0KFDDg4OP/30k5WV1eeffy6TyXJzc93d3QMDAy9evHjw4EGVSmVraxseHs7lcg8ePNjW1iaTyTw8PO7du9fZ2enu7v7LL7/gb0VwcnKytrZesGDBzp07lyxZkpCQUFBQUFpa6uLisnv3bq1W++GHH7q4uBQWFnZ0dPj7++fk5BQVFf3lL39ZtmxZdnZ2fX399u3b/fz80tLSPDw8Pv/889WrV1+8eBHDsM8++yw+Pn7lypV0Ov306dM2Nja7d++eMWOGs7PzmjVrpoEua0BYSFDgXP/RrbtIIrmWnIJ/joqMiIyYPyASnb98Jf3XewDA4rqC1dtg999AcwS9bDweAgaYAtQN0PWptGqxtPULqahFKp8GlOXxeLGxsQwGg0ajxcbGvvTSS5aWljU1NZ6eniwWSyKRaDQaLpfb1NS0b9++8PDwkJCQ7u5uDMOys7Px7EN2dvbly5cFAgGuT3E4nPr6+osXL86bN+/w4cP46x38/PzMzc1lMplOp7t48aJQKNy/f39CQsKJEydCQ0MrKytTU1Pr6upmzZplb2/f09MjFottbGyio6P9/Pw0Gk1cXNymTZs8PT0rKytlMtmVK1e+/vprExOT0NBQJpNZUFCQlJQUGxs7eRP5DF698VLcUpFEkvcg38SE2D1AEaStrf1fJ75597/eBIDohQtM6Sa30zNu3Ezt6+tfv2YVy3wGmL8uNXGF/n/DwCVA6Y8/Sv6kJaoTg7IUNE0gugLMMClnHZiFsRhTnbhtbW2urq54pr6urk6tViclJRUUFFAolB07dqxfv37dunVCodDKyqqjo0MikWAYVlhY2NraumvXrqysrO+++06lUiUkJMTExFhaWlKp1JSUFI1GY2FhUVJSAgDHjx+n0WhmZmYHDx48d+4ciqJ4vaxQKBwYGODxeH19fUKhsLq6+v3336dQKF5eXjt27MDdZRqNhtfClpaWKhSK8PBwHo+HC3Pu7u5Hjhw5cuRIRkbG6dOnZ8yYMbqcNxUpCwDzQwKlUmlJeQWTwRhJ1GxuER77+tQ7b20DgPmhISY02p2793LzC3v7B6IWRHh7zWbZLJRS7cD0Oej+DPQiQEzHbHApABho+0DbB5oWkOeAaYCUFcOauWbK8jUpKYnP5y9atGj+/PkVFRVFRUXe3t6bNm1KTEz08fHZtWvX2bNnr1275uLiolQq1Wq1XC5Xq9W5ubn29vbr16+nUqllZWXW1tYoin788ccCgWDRokWdnZ18Pl8gEGRmZrq7u2/dutXW1tbT0zM8PPzmzZt6vf6bb74JDQ29evVqUVHRgQMHlEpld3f3xo0b5XL5rVu3VqxYsXbt2qampvz8fC6Xi9cf5+Tk6PV6f39/LperVqsVCsXmzZvZbPby5cvb29vLy8tHepR3qlOW5+q6aIFGpVbX1NYxGARUw2WvRkHzV998u3xZjJOjY+C855hMZurdXyurasQSSU9fb2T4fJbFbLCYLTVxgZ5/gSwTKOwxv9cNGfSD9TJQ1oC6GRQFUtE1MItgOe6QyrGx1I//kSgpKenu7sbD7bq6ugcPHkREROzbty8nJyc1NfXq1asff/yxr6/vV199BQA3b948dOhQdnZ2RkZGcHCwnZ3dokWLzp07Z21t7ePjk5ube+7cudu3b6MoGhkZ6eDgUFBQ8Prrr+/du9fQ3a5du2pra0+ePHnmzBmZTBYfH7969Wp8T3/ttde6u7uvX7+emZn5wQcf9Pb2JiUlGZJh169fB4BTp06hKKrT6RYvXtzf33/hwgUOhwND3mQzbRSDYaip5d+9l1XNr2OM8MIcfGyesz2WvfC8C/4aM379vZzc2rp6jrn5vLlzVq0YLAeR9uSCOAl6vgKECsgE1qEeMB0ACrRZQPcCZgSwl7Is50wdyhYUFAiFQh8fH19f37q6urKyspkzZy5cuLCoqKi2ttbZ2bm+vt7d3R3fcwUCwf379319ffl8vr29Pc6n5ORkGo3m6+vb29tbWVmpUqnYbLabm9uMGTPu3r3r7+8/tGoMADIzM2traxUKhYWFBf6mzvT0dIVCsXz5cqFQmJeXx2Aw8Krt7777jsfjRUZGAsDly5dVKpVGo8HnbuvWrfn5+fX19TKZzMLCwtvbe5geN80oCwA1fH5aRmZVdS3+KgMCKmEYAHh7zjaos0Jha/b9B7kPClAE8ZztERoUGBocCABSUSuIk6H3K1DVj1xG8yQ5DMOfWLcAuheYRYBZNGtGHJCYSnjGb/H28fKiUqmz3d1GKbbCMD0AQqcPvhnT2dnJ2dlppp2dSqVCUdTgDbM4TsB5R0q1A037RClr6FILmAqo1kDhkBSZapiK/5FmMpDKMUCekhuKAYv8P00kZUmQmCTI/xROgqQsCRIkZUmQIClLgqQsCRIkZUmQIClLgqQsCRIkZUmQIClLgqQsCRIkZUmQIClLgqQsCRIkZUmQGBf+B1VNjsXI0LyvAAAAAElFTkSuQmCC" alt="Lemar Transportes"><b>Lemar Logística e Transportes LTDA</b></div>
+  <h1>Controle de Estoque dos EPIs e Uniformes</h1>
+</header>
+<nav id="nav">
+  <button data-go="cad"><i class="ic" data-i="plus"></i>Cadastrar item</button>
+  <button data-go="mov"><i class="ic" data-i="swap"></i>Movimentar Estoque</button>
+  <button data-go="epi"><i class="ic" data-i="shield"></i>Estoque EPIs</button>
+  <button data-go="uni"><i class="ic" data-i="shirt"></i>Estoque Uniformes</button>
+  <button data-go="exp"><i class="ic" data-i="dl"></i>Exportação</button>
+</nav>
+<main>
+<section id="v-cad">
+  <h2>Cadastrar item</h2>
+  <div class="choice">
+    <button data-go="cadU"><i class="ic" data-i="shirt"></i><b>Uniforme</b><small>Camisas, calças, jaquetas e similares</small></button>
+    <button data-go="cadE"><i class="ic" data-i="shield"></i><b>EPI</b><small>Equipamentos de proteção individual</small></button>
+  </div>
+</section>
+
+<section id="v-cadU">
+  <h2>Cadastrar Uniforme</h2>
+  <div class="card"><form id="fU">
+    <label>Código do item<input name="code" required></label>
+    <label>Nome do item<input name="name" required></label>
+    <label>Tamanho<select name="size" required class="sz"></select></label>
+    <label>Em estoque<input name="stock" type="number" min="0" step="1" value="0" required></label>
+    <label>Estoque base<input name="min" type="number" min="0" step="1" value="0" required></label>
+    <div class="act"><button class="btn" type="submit">Salvar uniforme</button><button class="btn g" type="button" data-go="cad">Voltar</button></div>
+  </form></div>
+</section>
+
+<section id="v-cadE">
+  <h2>Cadastrar EPI</h2>
+  <div class="card"><form id="fE">
+    <label>Código do item<input name="code" required></label>
+    <label>Nome do item<input name="name" required></label>
+    <label>Categoria do EPI<select name="cat" required id="cats"></select></label>
+    <label>Unidade de medida<select name="unit" required id="units"></select></label>
+    <label>Tamanho <span class="hint">(quando aplicável)</span><select name="size" class="sz" data-opt="1"></select></label>
+    <label>Número do CA <span class="hint">(quando aplicável)</span><input name="ca"></label>
+    <label>Em estoque<input name="stock" type="number" min="0" step="1" value="0" required></label>
+    <label>Estoque base<input name="min" type="number" min="0" step="1" value="0" required></label>
+    <div class="act"><button class="btn" type="submit">Salvar EPI</button><button class="btn g" type="button" data-go="cad">Voltar</button></div>
+  </form></div>
+</section>
+
+<section id="v-mov">
+  <h2>Movimentar Estoque</h2>
+  <div class="card"><form id="fM">
+    <label>Data da movimentação<input name="date" type="date" required></label>
+    <label>Tipo de movimentação<select name="type" required><option>Entrada</option><option>Saída</option></select></label>
+    <label>Responsável pelo lançamento<input name="who" required></label>
+    <label id="lc" hidden>Nome do Colaborador<input name="colab"></label>
+    <div class="lines" id="lines"></div>
+    <div class="act"><button class="btn g" type="button" id="addl"><i class="ic" data-i="plus"></i>Adicionar item</button></div>
+    <div class="act"><button class="btn" type="submit">Registrar movimentação</button></div>
+  </form></div>
+  <div class="card" style="margin-top:14px">
+    <div class="top"><h3 style="margin:0">Histórico de movimentações</h3><input id="qh" type="search" placeholder="Buscar no histórico…"></div>
+    <div class="tw" id="hist"></div>
+  </div>
+</section>
+
+<section id="v-epi">
+  <h2>Estoque EPIs</h2>
+  <div class="card"><div class="top"><span id="ce"></span><select id="oe" aria-label="Ordenação"><option value="asc">Organizar por código (Crescente)</option><option value="desc">Organizar por código (Decrescente)</option></select><input id="qe" type="search" placeholder="Buscar EPI…"></div><div class="tw" id="te"></div></div>
+</section>
+
+<section id="v-uni">
+  <h2>Estoque Uniformes</h2>
+  <div class="card"><div class="top"><span id="cu"></span><select id="ou" aria-label="Ordenação"><option value="asc">Organizar por código (Crescente)</option><option value="desc">Organizar por código (Decrescente)</option></select><input id="qu" type="search" placeholder="Buscar uniforme…"></div><div class="tw" id="tu"></div></div>
+</section>
+<section id="v-edit">
+  <h2 id="et">Editar item</h2>
+  <div class="card"><form id="fX"></form>
+  <div class="hint" style="margin-top:10px">Alterar o estoque aqui não gera registro no histórico. Para entradas e saídas, use a aba Movimentar Estoque.</div></div>
+</section>
+<section id="v-exp">
+  <h2>Exportação</h2>
+  <div class="grid">
+    <div class="card"><h3><i class="ic" data-i="file"></i> Estoque total</h3><p class="hint">EPIs e Uniformes com os itens e as quantidades atuais (uma planilha para cada).</p><button class="btn" data-ex="stock"><i class="ic" data-i="dl"></i>Exportar Excel</button></div>
+    <div class="card"><h3><i class="ic" data-i="swap"></i> Movimentações</h3><p class="hint">Escolha o período. Deixe em branco para exportar tudo.</p><div class="drow"><label>De<input type="date" id="xd1"></label><label>Até<input type="date" id="xd2"></label></div><button class="btn" data-ex="moves"><i class="ic" data-i="dl"></i>Exportar Excel</button></div>
+    <div class="card"><h3><i class="ic" data-i="cart"></i> Recomendação de compra</h3><p class="hint">Itens em atenção (abaixo de 50% do EST BASE) e a quantidade necessária para atingir o estoque base.</p><button class="btn" data-ex="buy"><i class="ic" data-i="dl"></i>Exportar Excel</button></div>
+    <div class="card" id="imp" hidden><h3><i class="ic" data-i="plus"></i> Importar itens iniciais</h3><p class="hint">Carrega os 127 itens da planilha enviada (cadastro, estoque atual e EST BASE). Só aparece enquanto o sistema estiver sem itens.</p><button class="btn" id="impb" type="button">Importar 127 itens</button></div>
+  </div>
+</section>
+</main>
+<footer id="mode"></footer>
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* ====== CONFIGURAÇÃO DO PROJETO FIREBASE (estoque-ssma) ====== */
+const firebaseConfig={
+  apiKey:"AIzaSyBD--p5YgnfUBXV53RolSilCuiqSEIvmf8",
+  authDomain:"estoque-ssma.firebaseapp.com",
+  projectId:"estoque-ssma",
+  storageBucket:"estoque-ssma.firebasestorage.app",
+  messagingSenderId:"286658275432",
+  appId:"1:286658275432:web:b64340d3415e3263d173dd"
+};
+/* itens iniciais (importados da planilha estoque_total_2026-10-29): [tipo,código,nome,categoria,unidade,tamanho,CA,estoque,EST BASE] */
+const SEED=[["EPI","127","BOLSAS P/KIT","Outros","Unidade","","",37,100],["EPI","73","BOTINA 35","Proteção para os pés","Par","","50912",0,6],["EPI","74","BOTINA 36","Proteção para os pés","Par","","50912",0,6],["EPI","75","BOTINA 37","Proteção para os pés","Par","","50912",0,6],["EPI","76","BOTINA 38","Proteção para os pés","Par","","50912",0,8],["EPI","77","BOTINA 39","Proteção para os pés","Par","","50912",0,8],["EPI","78","BOTINA 40","Proteção para os pés","Par","","50912",0,8],["EPI","79","BOTINA 41","Proteção para os pés","Par","","50912",0,8],["EPI","80","BOTINA 42","Proteção para os pés","Par","","50912",0,8],["EPI","81","BOTINA 43","Proteção para os pés","Par","","50912",0,8],["EPI","82","BOTINA 44","Proteção para os pés","Par","","50912",0,8],["EPI","83","BOTINA 45","Proteção para os pés","Par","","50912",0,6],["EPI","84","BOTINA 46","Proteção para os pés","Par","","50912",0,6],["EPI","124","CALÇADO ANTIDERRAPANTE","Proteção para os pés","Par","","37390",2,2],["EPI","114","CAPA DE CHUVA","Outros","Unidade","G","",20,10],["EPI","115","CAPA DE CHUVA","Outros","Unidade","GG","",27,10],["EPI","116","CAPA DE CHUVA","Outros","Unidade","XG","",10,10],["EPI","117","CAPACETE AMARELO","Proteção para cabeça","Unidade","","31649",8,10],["EPI","120","CINTA LOMBAR","Outros","Unidade","G","",1,3],["EPI","121","CINTA LOMBAR","Outros","Unidade","GG","",2,3],["EPI","119","CINTA LOMBAR","Outros","Unidade","M","",0,3],["EPI","118","CINTA LOMBAR","Outros","Unidade","P","",0,3],["EPI","122","CINTA LOMBAR","Outros","Unidade","XG","",0,3],["EPI","123","CINTA LOMBAR","Outros","Unidade","XGG","",0,3],["EPI","87","COLETE REFLETIVO","Outros","Unidade","G","",0,40],["EPI","88","COLETE REFLETIVO","Outros","Unidade","GG","",22,40],["EPI","86","COLETE REFLETIVO","Outros","Unidade","M","",23,40],["EPI","85","COLETE REFLETIVO","Outros","Unidade","P","",0,30],["EPI","89","COLETE REFLETIVO","Outros","Unidade","XG","",54,30],["EPI","90","COLETE REFLETIVO","Outros","Unidade","XGG","",45,20],["EPI","91","COLETE REFLETIVO","Outros","Unidade","XGG1","",20,20],["EPI","92","COLETE REFLETIVO","Outros","Unidade","XGG2","",0,15],["EPI","93","COLETE REFLETIVO","Outros","Unidade","XGG3","",0,15],["EPI","94","COLETE REFLETIVO","Outros","Unidade","XGG4","",14,15],["EPI","102","CREME DE PROTEÇÃO","Proteção para as mãos","Unidade","","39091",7,10],["EPI","112","FILTROS RESPIRADORES","Proteção respiratória","Unidade","","",7,6],["EPI","126","FITA ZEBRADA","Outros","Rolo","","",9,6],["EPI","97","LUVA DE POSTO","Proteção para as mãos","Par","","",9,15],["EPI","98","LUVA DE RASPA","Proteção para as mãos","Par","","8048",4,5],["EPI","95","LUVA DE VAQUETA","Proteção para as mãos","Par","","26061",96,100],["EPI","96","LUVA NITRÍLICA","Proteção para as mãos","Par","","48884",32,20],["EPI","101","LUVA SINTÉTICA","Proteção para as mãos","Caixa","","",1,1],["EPI","100","LUVAS DE LÁTEX","Proteção para as mãos","Caixa","","28324",1,1],["EPI","99","LUVAS DE VINIL","Proteção para as mãos","Caixa","","27802",1,1],["EPI","111","MÁSCARA PANORÂMICA","Proteção respiratória","Unidade","","",4,4],["EPI","109","MÁSCARA PFF2","Proteção respiratória","Unidade","","45021",27,20],["EPI","106","ÓCULOS 120","Outros","Unidade","","",3,2],["EPI","103","ÓCULOS DE PROTEÇÃO LC","Outros","Unidade","","34082",20,20],["EPI","104","ÓCULOS DE PROTEÇÃO LE","Outros","Unidade","","19625",9,10],["EPI","105","ÓCULOS ESC P/SOLDA","Outros","Unidade","","",2,2],["EPI","108","PROTETOR AURI CONCHA","Proteção auditiva","Unidade","","27629",12,10],["EPI","107","PROTETOR AURI PLUG","Proteção auditiva","Unidade","","14470",114,80],["EPI","125","PROTETOR SOLAR 60","Outros","Unidade","","",15,15],["EPI","110","RESPIRADOR 1/4","Proteção respiratória","Unidade","","",7,10],["EPI","113","RESPIRADOR 1/4 SEMI","Proteção respiratória","Unidade","","",10,6],["EPI","61","SAPATO 35","Proteção para os pés","Par","","43334",9,8],["EPI","62","SAPATO 36","Proteção para os pés","Par","","43334",6,8],["EPI","63","SAPATO 37","Proteção para os pés","Par","","43334",4,8],["EPI","64","SAPATO 38","Proteção para os pés","Par","","43334",8,10],["EPI","65","SAPATO 39","Proteção para os pés","Par","","43334",10,12],["EPI","66","SAPATO 40","Proteção para os pés","Par","","43334",16,14],["EPI","67","SAPATO 41","Proteção para os pés","Par","","43334",15,14],["EPI","68","SAPATO 42","Proteção para os pés","Par","","43334",10,14],["EPI","69","SAPATO 43","Proteção para os pés","Par","","43334",18,14],["EPI","70","SAPATO 44","Proteção para os pés","Par","","43334",10,14],["EPI","71","SAPATO 45","Proteção para os pés","Par","","43334",10,8],["EPI","72","SAPATO 46","Proteção para os pés","Par","","43334",3,6],["Uniforme","23","BERMUDA","","","G","",0,60],["Uniforme","24","BERMUDA","","","GG","",0,60],["Uniforme","22","BERMUDA","","","M","",0,60],["Uniforme","21","BERMUDA","","","P","",0,60],["Uniforme","25","BERMUDA","","","XG","",0,50],["Uniforme","26","BERMUDA","","","XGG","",0,30],["Uniforme","27","BERMUDA","","","XGG1","",0,30],["Uniforme","28","BERMUDA","","","XGG2","",0,30],["Uniforme","29","BERMUDA","","","XGG3","",0,30],["Uniforme","30","BERMUDA","","","XGG4","",0,30],["Uniforme","13","CALÇA MOTORISTA","","","G","",0,60],["Uniforme","14","CALÇA MOTORISTA","","","GG","",0,60],["Uniforme","12","CALÇA MOTORISTA","","","M","",0,60],["Uniforme","11","CALÇA MOTORISTA","","","P","",0,60],["Uniforme","15","CALÇA MOTORISTA","","","XG","",0,50],["Uniforme","16","CALÇA MOTORISTA","","","XGG","",0,30],["Uniforme","17","CALÇA MOTORISTA","","","XGG1","",0,30],["Uniforme","18","CALÇA MOTORISTA","","","XGG2","",0,30],["Uniforme","19","CALÇA MOTORISTA","","","XGG3","",0,30],["Uniforme","20","CALÇA MOTORISTA","","","XGG4","",0,30],["Uniforme","53","CALÇA OFICINA","","","G","",0,30],["Uniforme","54","CALÇA OFICINA","","","GG","",0,30],["Uniforme","52","CALÇA OFICINA","","","M","",0,30],["Uniforme","51","CALÇA OFICINA","","","P","",0,30],["Uniforme","55","CALÇA OFICINA","","","XG","",0,30],["Uniforme","56","CALÇA OFICINA","","","XGG","",0,20],["Uniforme","57","CALÇA OFICINA","","","XGG1","",0,20],["Uniforme","58","CALÇA OFICINA","","","XGG2","",0,20],["Uniforme","59","CALÇA OFICINA","","","XGG3","",0,20],["Uniforme","60","CALÇA OFICINA","","","XGG4","",0,20],["Uniforme","3","CAMISETA MOTORISTA","","","G","",0,100],["Uniforme","4","CAMISETA MOTORISTA","","","GG","",0,100],["Uniforme","2","CAMISETA MOTORISTA","","","M","",32,100],["Uniforme","1","CAMISETA MOTORISTA","","","P","",43,100],["Uniforme","5","CAMISETA MOTORISTA","","","XG","",0,100],["Uniforme","6","CAMISETA MOTORISTA","","","XGG","",0,70],["Uniforme","7","CAMISETA MOTORISTA","","","XGG1","",0,60],["Uniforme","8","CAMISETA MOTORISTA","","","XGG2","",0,60],["Uniforme","9","CAMISETA MOTORISTA","","","XGG3","",0,60],["Uniforme","10","CAMISETA MOTORISTA","","","XGG4","",0,60],["Uniforme","33","CAMISETA OFICINA","","","G","",0,50],["Uniforme","34","CAMISETA OFICINA","","","GG","",0,50],["Uniforme","32","CAMISETA OFICINA","","","M","",0,50],["Uniforme","31","CAMISETA OFICINA","","","P","",0,50],["Uniforme","35","CAMISETA OFICINA","","","XG","",0,50],["Uniforme","36","CAMISETA OFICINA","","","XGG","",0,30],["Uniforme","37","CAMISETA OFICINA","","","XGG1","",0,30],["Uniforme","38","CAMISETA OFICINA","","","XGG2","",0,30],["Uniforme","39","CAMISETA OFICINA","","","XGG3","",0,30],["Uniforme","40","CAMISETA OFICINA","","","XGG4","",0,30],["Uniforme","43","JALECO","","","G","",0,15],["Uniforme","44","JALECO","","","GG","",0,15],["Uniforme","42","JALECO","","","M","",0,15],["Uniforme","41","JALECO","","","P","",0,15],["Uniforme","45","JALECO","","","XG","",0,15],["Uniforme","46","JALECO","","","XGG","",0,15],["Uniforme","47","JALECO","","","XGG1","",0,15],["Uniforme","48","JALECO","","","XGG2","",0,15],["Uniforme","49","JALECO","","","XGG3","",0,15],["Uniforme","50","JALECO","","","XGG4","",0,15]];
+let loaded=false;
+/* ============================================================== */
+const SIZES=['P','M','G','GG','XG','XGG','XGG1','XGG2','XGG3','XGG4'];
+const CATS=['Proteção para cabeça','Proteção respiratória','Proteção auditiva','Proteção para as mãos','Proteção para os pés','Trabalho em altura','Outros'];
+const UNITS=['Unidade','Par','Caixa','Pacote','Rolo','Litro'];
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const today=()=>ymd(new Date());
+const ago=n=>{const d=new Date();d.setDate(d.getDate()-n);return ymd(d)};
+const br=d=>String(d||'').split('-').reverse().join('/');
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const full=i=>i.name+(i.size?' ('+i.size+')':'');
+let items=[],moves=[],db=null,editId=null,backTo='epi';
+const P={grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',plus:'<path d="M12 5v14M5 12h14"/>',swap:'<path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',shield:'<path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6l-8-3z"/>',shirt:'<path d="M8 3 3 6l2 4 3-1v12h8V9l3 1 2-4-5-3a4 4 0 0 1-8 0z"/>',dl:'<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>',alert:'<path d="M12 3 2 20h20L12 3zM12 10v4M12 17.5v.01"/>',trend:'<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',cart:'<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12h11l2-8H6"/>',out:'<path d="M12 20V9M7 13l5-5 5 5M5 4h14"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',logout:'<path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9"/>',file:'<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8l-5-5zM14 3v5h5M9 13h6M9 17h6"/>'};
+const ICON=n=>`<svg viewBox="0 0 24 24" aria-hidden="true">${P[n]||''}</svg>`;
+const icons=(r=document)=>r.querySelectorAll('[data-i]').forEach(e=>{if(!e.firstChild)e.innerHTML=ICON(e.dataset.i)});
+const mq=matchMedia('(prefers-color-scheme: dark)');
+const theme=()=>document.documentElement.dataset.theme||(mq.matches?'dark':'light');
+function paintT(){const d=theme()==='dark';$('#tg').innerHTML=ICON(d?'sun':'moon');$('#tg').title=d?'Tema claro':'Tema escuro'}
+try{const t=localStorage.getItem('lemar_theme');if(t)document.documentElement.dataset.theme=t}catch(e){}
+$('#tg').addEventListener('click',()=>{const t=theme()==='dark'?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('lemar_theme',t)}catch(e){}paintT()});
+mq.addEventListener&&mq.addEventListener('change',paintT);
+icons();paintT();
+
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return []}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+items=[];moves=[];
+$('#mode').textContent='Os dados ficam salvos neste navegador.';
+
+/* ---------- persistência ---------- */
+async function saveItem(it){
+  if(db){await db.collection('items').doc(it.id).set(it);return}
+  const i=items.findIndex(x=>x.id===it.id);i<0?items.push(it):items[i]=it;lsSet('lemar_items',items);render();
+}
+async function removeItem(id){
+  if(db){await db.collection('items').doc(id).delete();return}
+  items=items.filter(x=>x.id!==id);lsSet('lemar_items',items);render();
+}
+async function addMove(m,it){
+  const ni={...it,stock:it.stock+(m.type==='Entrada'?m.qty:-m.qty)};
+  m.after=ni.stock;
+  if(db){await db.collection('moves').doc(m.id).set(m);await db.collection('items').doc(it.id).set(ni);return ni}
+  moves.push(m);lsSet('lemar_moves',moves);await saveItem(ni);return ni;
+}
+
+/* ---------- cálculos ---------- */
+const isAt=i=>i.min>0&&i.stock<i.min*0.5; /* atenção: abaixo de 50% do estoque base */
+function outs(from){return moves.filter(m=>m.type==='Saída'&&m.date>=from)}
+function sumBy(list){const o={};list.forEach(m=>{o[m.itemId]=(o[m.itemId]||0)+m.qty});return o}
+
+/* ---------- render ---------- */
+const badge=i=>isAt(i)?`<span class="b wa"><span class="ic">${ICON('alert')}</span> Atenção</span>`:'<span class="b ok">OK</span>';
+const table=(head,rows,empty)=>rows.length?`<table><thead><tr>${head.map(h=>`<th class="${h[1]||''}">${h[0]}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`:`<div class="empty">${empty}</div>`;
+
+
+function stockTable(kind,q,cols){
+  const t=(q||'').toLowerCase(),ord=$(kind==='EPI'?'#oe':'#ou').value;
+  const list=items.filter(i=>i.kind===kind&&(i.code+' '+i.name+' '+(i.cat||'')+' '+(i.size||'')+' '+(i.ca||'')).toLowerCase().includes(t)).sort((a,b)=>(ord==='desc'?-1:1)*(a.code.localeCompare(b.code,'pt-BR',{numeric:true})||SIZES.indexOf(a.size)-SIZES.indexOf(b.size)));
+  const head=cols.map(c=>[c[0],c[2]]).concat([['Situação'],['']]);
+  const rows=list.map(i=>`<tr class="${isAt(i)?'alert':''}">${cols.map(c=>`<td class="${c[2]||''}">${c[1](i)}</td>`).join('')}<td>${badge(i)}</td><td><button class="btn s ed" data-edit="${i.id}">Editar</button><button class="btn s" data-del="${i.id}">Excluir</button></td></tr>`);
+  return[table(head,rows,'Nenhum item cadastrado.'),list];
+}
+function renderStocks(){
+  const E=stockTable('EPI',$('#qe').value,[['Código',i=>esc(i.code)],['Nome',i=>esc(i.name)],['Categoria',i=>esc(i.cat)],['Unidade',i=>esc(i.unit)],['Tam.',i=>esc(i.size||'—')],['CA',i=>esc(i.ca||'—')],['Em estoque',i=>'<b>'+i.stock+'</b>','r'],['EST BASE',i=>i.min,'r']]);
+  $('#te').innerHTML=E[0];const le=items.filter(i=>i.kind==='EPI'&&isAt(i)).length;
+  $('#ce').innerHTML=`<b>${items.filter(i=>i.kind==='EPI').length}</b> EPIs cadastrados`+(le?` · <span class="b wa"><span class="ic">${ICON('alert')}</span> ${le} em atenção</span>`:'');
+  const U=stockTable('Uniforme',$('#qu').value,[['Código',i=>esc(i.code)],['Nome',i=>esc(i.name)],['Tamanho',i=>esc(i.size)],['Em estoque',i=>'<b>'+i.stock+'</b>','r'],['EST BASE',i=>i.min,'r']]);
+  $('#tu').innerHTML=U[0];const lu=items.filter(i=>i.kind==='Uniforme'&&isAt(i)).length;
+  $('#cu').innerHTML=`<b>${items.filter(i=>i.kind==='Uniforme').length}</b> uniformes cadastrados`+(lu?` · <span class="b wa"><span class="ic">${ICON('alert')}</span> ${lu} em atenção</span>`:'');
+}
+function itemOpts(){
+  const opt=k=>items.filter(i=>i.kind===k).sort((a,b)=>full(a).localeCompare(full(b),'pt-BR')).map(i=>`<option value="${i.id}">${esc(i.code)} — ${esc(full(i))} · estoque ${i.stock}</option>`).join('');
+  return '<option value="">Selecione o item…</option>'+(items.some(i=>i.kind==='EPI')?'<optgroup label="EPIs">'+opt('EPI')+'</optgroup>':'')+(items.some(i=>i.kind==='Uniforme')?'<optgroup label="Uniformes">'+opt('Uniforme')+'</optgroup>':'');
+}
+function fillSel(){const o=itemOpts();$$('#lines .mi').forEach(x=>{const v=x.value;x.innerHTML=o;x.value=v})}
+function syncRm(){const n=$$('#lines .ln').length;$$('#lines .rl').forEach(b=>b.hidden=n<2)}
+function addLine(){const d=document.createElement('div');d.className='ln';d.innerHTML='<label>Item<select class="mi" required></select></label><label>Quantidade<input class="mq" type="number" min="1" step="1" required></label><button type="button" class="btn s rl" title="Remover item" aria-label="Remover item"><i class="ic" data-i="x"></i></button>';$('#lines').appendChild(d);icons(d);fillSel();syncRm()}
+function renderMove(){
+  fillSel();
+  const t=$('#qh').value.toLowerCase();
+  const h=moves.filter(m=>(m.name+' '+m.who+' '+(m.colab||'')+' '+m.type).toLowerCase().includes(t)).sort((a,b)=>b.ts-a.ts).slice(0,150);
+  $('#hist').innerHTML=table([['Data'],['Tipo'],['Item'],['Qtd','r'],['Saldo após','r'],['Responsável'],['Colaborador'],['']],h.map(m=>`<tr><td>${br(m.date)}</td><td><span class="b ${m.type==='Entrada'?'ok':'wa'}">${m.type}</span></td><td>${esc(m.name)}</td><td class="r">${m.qty}</td><td class="r">${m.after??'—'}</td><td>${esc(m.who)}</td><td>${esc(m.colab||'—')}</td><td><button class="btn s" data-delmove="${m.id}">Excluir</button></td></tr>`),'Nenhuma movimentação registrada.');
+}
+function renderImp(){const c=$('#imp');if(c)c.hidden=!(db&&loaded&&!items.length&&SEED.length)}
+async function importSeed(){
+  if(!db||items.length)return;
+  const b=db.batch();
+  SEED.forEach(r=>{const[kind,code,name,cat,unit,size,ca,stock,min]=r,id='seed_'+kind+'_'+code,o={id,kind,code,name,size:size||'',stock,min};if(kind==='EPI'){o.cat=cat;o.unit=unit;o.ca=ca||''}b.set(db.collection('items').doc(id),o)});
+  try{await b.commit();toast('Itens importados com sucesso!')}catch(e){toast('Erro ao importar: '+e.message)}
+}
+function render(){renderStocks();renderMove();renderImp()}
+
+/* ---------- navegação ---------- */
+function show(v){
+  $$('section').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));
+  const tab=v==='cadU'||v==='cadE'?'cad':v==='edit'?backTo:v;
+  $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.go===tab));
+  window.scrollTo(0,0);
+}
+document.addEventListener('click',e=>{
+  const g=e.target.closest('[data-go]');if(g){show(g.dataset.go);return}
+  if(e.target.closest('#impb')){importSeed();return}
+  if(e.target.closest('#addl')){addLine();return}
+  const rl=e.target.closest('.rl');if(rl){rl.closest('.ln').remove();syncRm();return}
+  const ex=e.target.closest('[data-ex]');if(ex){doExport(ex.dataset.ex);return}
+  const ed=e.target.closest('[data-edit]');if(ed){openEdit(ed.dataset.edit);return}
+  if(e.target.closest('[data-cancel]')){show(backTo);return}
+  const dm=e.target.closest('[data-delmove]');if(dm){if(dm.dataset.c){delMove(dm.dataset.delmove);return}dm.dataset.c=1;dm.textContent='Confirmar?';setTimeout(()=>{if(dm.isConnected){delete dm.dataset.c;dm.textContent='Excluir'}},3500);return}
+  const d=e.target.closest('[data-del]');if(d){
+    if(d.dataset.c){removeItem(d.dataset.del);toast('Item excluído.');return}
+    d.dataset.c=1;d.textContent='Confirmar?';setTimeout(()=>{if(d.isConnected){delete d.dataset.c;d.textContent='Excluir'}},3500)}
+});
+let tt;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),3000)}
+
+/* ---------- excluir movimentação ---------- */
+async function delMove(id){
+  const m=moves.find(x=>x.id===id);if(!m)return;
+  const it=items.find(i=>i.id===m.itemId);
+  if(it){
+    const ns=it.stock+(m.type==='Saída'?m.qty:-m.qty);
+    if(ns<0)return toast('Não é possível excluir: o estoque de '+full(it)+' ficaria negativo.');
+    const ni={...it,stock:ns};
+    if(db)await db.collection('items').doc(it.id).set(ni);else await saveItem(ni);
+  }
+  if(db)await db.collection('moves').doc(id).delete();
+  else{moves=moves.filter(x=>x.id!==id);lsSet('lemar_moves',moves);render()}
+  toast('Movimentação excluída e estoque ajustado.');
+}
+
+/* ---------- exportação ---------- */
+async function saveX(name,sheets){
+  let blob,fn;
+  if(window.XLSX){
+    const wb=XLSX.utils.book_new();
+    sheets.forEach(([n,r])=>{const ws=XLSX.utils.aoa_to_sheet(r);ws['!cols']=r[0].map((_,c)=>({wch:Math.min(42,Math.max(10,...r.map(x=>String(x[c]??'').length))+2)}));XLSX.utils.book_append_sheet(wb,ws,n)});
+    blob=new Blob([XLSX.write(wb,{type:'array',bookType:'xlsx'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});fn=name+'.xlsx';
+  }else{
+    const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+    blob=new Blob(['\ufeff'+sheets.flatMap(([n,r])=>[[n],...r,[]]).map(r=>r.map(q).join(';')).join('\r\n')],{type:'text/csv'});fn=name+'.csv';
+  }
+  let dl=null;try{dl=await claude.use('downloads')}catch(e){}
+  if(dl){try{await dl.save({filename:fn,data:blob});toast('Arquivo pronto: '+fn)}catch(e){if(!e||e.code!=='declined')toast('Não foi possível salvar o arquivo.')}return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('Arquivo gerado: '+fn);
+}
+function doExport(k){
+  const by=(a,b)=>full(a).localeCompare(full(b),'pt-BR'),sit=i=>isAt(i)?'Atenção':'OK',d=today();
+  if(k==='stock'){
+    const E=items.filter(i=>i.kind==='EPI').sort(by),U=items.filter(i=>i.kind==='Uniforme').sort(by);
+    if(!E.length&&!U.length)return toast('Não há itens cadastrados.');
+    saveX('estoque_total_'+d,[['EPIs',[['Código','Nome do item','Categoria','Unidade','Tamanho','Nº CA','Em estoque','EST BASE','Situação'],...E.map(i=>[i.code,i.name,i.cat,i.unit,i.size||'',i.ca||'',i.stock,i.min,sit(i)])]],['Uniformes',[['Código','Nome do item','Tamanho','Em estoque','EST BASE','Situação'],...U.map(i=>[i.code,i.name,i.size,i.stock,i.min,sit(i)])]]]);
+  }else if(k==='moves'){
+    const a=$('#xd1').value,b=$('#xd2').value;
+    if(a&&b&&a>b)return toast('A data inicial é maior que a final.');
+    const L=moves.filter(m=>(!a||m.date>=a)&&(!b||m.date<=b)).sort((x,y)=>x.ts-y.ts);
+    if(!L.length)return toast('Nenhuma movimentação no período.');
+    saveX('movimentacoes_'+(a||'inicio')+'_a_'+(b||d),[['Movimentações',[['Data','Tipo','Item','Quantidade','Saldo após','Responsável','Colaborador'],...L.map(m=>[br(m.date),m.type,m.name,m.qty,m.after??'',m.who,m.colab||''])]]]);
+  }else{
+    const L=items.filter(isAt).sort((x,y)=>(y.min-y.stock)-(x.min-x.stock));
+    if(!L.length)return toast('Nenhum item em atenção no momento.');
+    saveX('recomendacao_de_compra_'+d,[['Compra',[['Código','Nome do item','Tipo','Tamanho','Em estoque','EST BASE','Quantidade a comprar'],...L.map(i=>[i.code,i.name,i.kind,i.size||'',i.stock,i.min,i.min-i.stock])]]]);
+  }
+}
+
+/* ---------- edição ---------- */
+function openEdit(id){
+  const i=items.find(x=>x.id===id);if(!i)return;editId=id;backTo=i.kind==='EPI'?'epi':'uni';
+  const inp=(l,n,v,x='')=>`<label>${l}<input name="${n}" value="${esc(v??'')}" ${x}></label>`;
+  const sel=(l,n,a,v,first)=>`<label>${l}<select name="${n}" ${first?'':'required'}>${first?`<option value="">${first}</option>`:''}${a.map(o=>`<option${o===v?' selected':''}>${o}</option>`).join('')}</select></label>`;
+  const epi=i.kind==='EPI';
+  $('#et').textContent='Editar '+(epi?'EPI':'Uniforme');
+  $('#fX').innerHTML=inp('Código do item','code',i.code,'required')+inp('Nome do item','name',i.name,'required')
+   +(epi?sel('Categoria do EPI','cat',CATS,i.cat)+sel('Unidade de medida','unit',UNITS,i.unit)+sel('Tamanho (quando aplicável)','size',SIZES,i.size,'— Não se aplica —')+inp('Número do CA (quando aplicável)','ca',i.ca):sel('Tamanho','size',SIZES,i.size))
+   +inp('Em estoque','stock',i.stock,'type="number" min="0" step="1" required')+inp('Estoque base','min',i.min,'type="number" min="0" step="1" required')
+   +'<div class="act"><button class="btn" type="submit">Salvar alterações</button><button class="btn g" type="button" data-cancel="1">Cancelar</button></div>';
+  show('edit');
+}
+$('#fX').addEventListener('submit',async e=>{
+  e.preventDefault();const f=e.target,i=items.find(x=>x.id===editId);if(!i)return show(backTo);
+  const code=f.code.value.trim();
+  if(items.some(x=>x.id!==i.id&&x.kind===i.kind&&x.code.toLowerCase()===code.toLowerCase()&&(x.size||'')===(f.size.value||'')))return toast('Já existe item com esse código e tamanho.');
+  const n={...i,code,name:f.name.value.trim(),size:f.size.value,stock:+f.stock.value,min:+f.min.value};
+  if(i.kind==='EPI'){n.cat=f.cat.value;n.unit=f.unit.value;n.ca=f.ca.value.trim()}
+  await saveItem(n);toast('Item atualizado!');show(backTo);
+});
+
+/* ---------- formulários ---------- */
+const optList=(a,first)=>(first?`<option value="">${first}</option>`:'')+a.map(x=>`<option>${x}</option>`).join('');
+$$('.sz').forEach(s=>s.innerHTML=optList(SIZES,s.dataset.opt?'— Não se aplica —':'Selecione…'));
+$('#cats').innerHTML=optList(CATS,'Selecione…');$('#units').innerHTML=optList(UNITS,'Selecione…');
+$('#fM').date.value=today();addLine();
+function tipo(){const s=$('#fM').type.value==='Saída';$('#lc').hidden=!s;$('#fM').colab.required=s;if(!s)$('#fM').colab.value=''}
+$('#fM').type.addEventListener('change',tipo);tipo();
+['#qe','#qu','#qh','#oe','#ou'].forEach(s=>$(s).addEventListener('input',render));
+
+function dup(kind,code,size){return items.some(i=>i.kind===kind&&i.code.toLowerCase()===code.toLowerCase()&&(i.size||'')===(size||''))}
+$('#fU').addEventListener('submit',async e=>{
+  e.preventDefault();const f=e.target,code=f.code.value.trim();
+  if(dup('Uniforme',code,f.size.value))return toast('Já existe uniforme com esse código e tamanho.');
+  await saveItem({id:uid(),kind:'Uniforme',code,name:f.name.value.trim(),size:f.size.value,stock:+f.stock.value,min:+f.min.value});
+  f.reset();toast('Uniforme cadastrado!');show('uni');
+});
+$('#fE').addEventListener('submit',async e=>{
+  e.preventDefault();const f=e.target,code=f.code.value.trim();
+  if(dup('EPI',code,f.size.value))return toast('Já existe EPI com esse código e tamanho.');
+  await saveItem({id:uid(),kind:'EPI',code,name:f.name.value.trim(),cat:f.cat.value,unit:f.unit.value,size:f.size.value,ca:f.ca.value.trim(),stock:+f.stock.value,min:+f.min.value});
+  f.reset();toast('EPI cadastrado!');show('epi');
+});
+$('#fM').addEventListener('submit',async e=>{
+  e.preventDefault();const f=e.target,saida=f.type.value==='Saída';
+  const ls=$$('#lines .ln').map(l=>({id:l.querySelector('.mi').value,q:Math.floor(+l.querySelector('.mq').value)}));
+  if(ls.some(l=>!l.id))return toast('Selecione o item em todas as linhas.');
+  if(ls.some(l=>!(l.q>=1)))return toast('Informe uma quantidade válida em todas as linhas.');
+  const tot={};ls.forEach(l=>tot[l.id]=(tot[l.id]||0)+l.q);
+  if(saida)for(const id in tot){const it=items.find(i=>i.id===id);if(!it||tot[id]>it.stock)return toast('Saída maior que o estoque de '+(it?full(it):'item')+' ('+(it?it.stock:0)+').')}
+  const cur={};items.forEach(i=>cur[i.id]=i);const ts=Date.now();let k=0;
+  for(const l of ls){const it=cur[l.id];if(!it)continue;cur[l.id]=await addMove({id:uid(),ts:ts+k++,date:f.date.value,type:f.type.value,itemId:it.id,name:full(it),qty:l.q,who:f.who.value.trim(),colab:saida?f.colab.value.trim():''},it)}
+  const w=f.who.value;$('#lines').innerHTML='';addLine();f.colab.value='';f.who.value=w;
+  toast(ls.length>1?'Movimentação registrada ('+ls.length+' itens)!':'Movimentação registrada!');
+});
+
+/* ---------- logo e atualização automática ---------- */
+setInterval(render,60000); /* recalcula janelas de 30 dias e do mês */
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();let unsub=[];
+auth.onAuthStateChanged(u=>{
+  unsub.forEach(f=>f());unsub=[];
+  if(!u){db=null;loaded=false;items=[];moves=[];$('#login').hidden=false;render();return}
+  $('#login').hidden=true;db=firebase.firestore();
+  const err=e=>toast('Erro ao ler os dados: '+e.message);
+  unsub.push(db.collection('items').onSnapshot(s=>{items=s.docs.map(d=>({...d.data(),id:d.id}));loaded=true;render()},err));
+  unsub.push(db.collection('moves').onSnapshot(s=>{moves=s.docs.map(d=>({...d.data(),id:d.id}));render()},err));
+  $('#mode').textContent='Conectado como '+u.email+' — dados em tempo real.';
+});
+$('#fL').addEventListener('submit',async e=>{e.preventDefault();$('#le').textContent='';try{await auth.signInWithEmailAndPassword(e.target.email.value.trim(),e.target.pw.value)}catch(x){$('#le').textContent='E-mail ou senha inválidos.'}});
+$('#lo').addEventListener('click',()=>auth.signOut());
+show('mov');render();
+</script>
+</body>
+</html>
