@@ -269,7 +269,7 @@ function addLine(){const d=document.createElement('div');d.className='ln';d.inne
 function renderMove(){
   fillSel();
   const t=$('#qh').value.toLowerCase();
-  const h=moves.filter(m=>(m.name+' '+m.who+' '+(m.colab||'')+' '+m.type).toLowerCase().includes(t)).sort((a,b)=>b.ts-a.ts).slice(0,150);
+  const h=moves.filter(m=>(m.name+' '+m.who+' '+(m.colab||'')+' '+m.type).toLowerCase().includes(t)).sort((a,b)=>String(b.date).localeCompare(String(a.date))||b.ts-a.ts).slice(0,150);
   $('#hist').innerHTML=table([['Data'],['Tipo'],['Item'],['Qtd','r'],['Saldo após','r'],['Responsável'],['Colaborador'],['']],h.map(m=>`<tr><td>${br(m.date)}</td><td><span class="b ${m.type==='Entrada'?'ok':'wa'}">${m.type}</span></td><td>${esc(m.name)}</td><td class="r">${m.qty}</td><td class="r">${m.after??'—'}</td><td>${esc(m.who)}</td><td>${esc(m.colab||'—')}</td><td><button class="btn s" data-delmove="${m.id}">Excluir</button></td></tr>`),'Nenhuma movimentação registrada.');
 }
 function renderImp(){const c=$('#imp');if(c)c.hidden=!(db&&loaded&&!items.length&&SEED.length)}
@@ -342,7 +342,7 @@ function doExport(k){
   }else if(k==='moves'){
     const a=$('#xd1').value,b=$('#xd2').value;
     if(a&&b&&a>b)return toast('A data inicial é maior que a final.');
-    const L=moves.filter(m=>(!a||m.date>=a)&&(!b||m.date<=b)).sort((x,y)=>x.ts-y.ts);
+    const L=moves.filter(m=>(!a||m.date>=a)&&(!b||m.date<=b)).sort((x,y)=>String(x.date).localeCompare(String(y.date))||x.ts-y.ts);
     if(!L.length)return toast('Nenhuma movimentação no período.');
     saveX('movimentacoes_'+(a||'inicio')+'_a_'+(b||d),[['Movimentações',[['Data','Tipo','Item','Quantidade','Saldo após','Responsável','Colaborador'],...L.map(m=>[br(m.date),m.type,m.name,m.qty,m.after??'',m.who,m.colab||''])]]]);
   }else{
